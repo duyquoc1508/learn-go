@@ -8,5 +8,5 @@ import (
 type IUserRepo interface {
 	FindUserByEmail(email string) (model.User, error)
 	CheckLoginInfo(email string, password string) (model.User, error)
-	Insert(user model.User) error
+	Insert(user *model.User) error
 }

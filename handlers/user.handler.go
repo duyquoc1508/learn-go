@@ -10,7 +10,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	config "go-demo/configs"
-	driver "go-demo/drivers"
 	dto "go-demo/dto"
 	model "go-demo/models"
 	repoImpl "go-demo/repositories/repoImpl"
@@ -34,7 +33,7 @@ func Register(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	_, err = repoImpl.NewUserRepo(driver.Mongo.Client.Database(config.DATABASE_NAME)).FindUserByEmail(payload.Email)
+	_, err = repoImpl.NewUserRepo().FindUserByEmail(payload.Email)
 	if err == nil { // email đã tồn tại
 		util.ResponseErr(response, http.StatusConflict, "Email đã được sử dụng")
 		return
@@ -49,7 +48,7 @@ func Register(response http.ResponseWriter, request *http.Request) {
 		Password:    hashedPassword,
 		DisplayName: payload.DisplayName,
 	}
-	err = repoImpl.NewUserRepo(driver.Mongo.Client.Database(config.DATABASE_NAME)).Insert(user)
+	err = repoImpl.NewUserRepo().Insert(&user)
 	if err != nil {
 		util.ResponseErr(response, http.StatusInternalServerError, "Đăng ký thất bại")
 		return
@@ -76,7 +75,7 @@ func Login(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 	var user model.User
-	user, err = repoImpl.NewUserRepo(driver.Mongo.Client.Database(config.DATABASE_NAME)).FindUserByEmail(payload.Email)
+	user, err = repoImpl.NewUserRepo().FindUserByEmail(payload.Email)
 	if err != nil {
 		util.ResponseErr(response, http.StatusNotFound, "Không tìm thấy thông tin tài khoản")
 		return
@@ -105,7 +104,7 @@ func GetUser(response http.ResponseWriter, request *http.Request) {
 	if !ok {
 		fmt.Println("Get claim data from context failed")
 	}
-	user, err := repoImpl.NewUserRepo(driver.Mongo.Client.Database(config.DATABASE_NAME)).FindUserByEmail(tokenClaims.Email)
+	user, err := repoImpl.NewUserRepo().FindUserByEmail(tokenClaims.Email)
 	if err != nil {
 		util.ResponseErr(response, http.StatusNotFound, "Không tìm thấy thông tin user")
 		return

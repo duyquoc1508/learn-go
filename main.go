@@ -1,11 +1,11 @@
 package main
 
 import (
-	"go-demo/driver"
+	driver "go-demo/drivers"
 
 	// models "go-demo/model"
-	handler "go-demo/handler"
-	"go-demo/middleware"
+	handler "go-demo/handlers"
+	middleware "go-demo/middlewares"
 	"log"
 	"net/http"
 	// repoImpl "go-demo/repository/repoImpl"
