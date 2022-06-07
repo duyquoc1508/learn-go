@@ -26,4 +26,4 @@ type Person struct {
 }
 
 // ref: https://www.mongodb.com/docs/drivers/go/current/fundamentals/bson/
-// + omitempty:
+// + omitempty: bỏ qua field bị empty để nó không xuất hiện trong json/bson
