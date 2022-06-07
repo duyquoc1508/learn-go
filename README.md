@@ -397,15 +397,19 @@ Có 3 thành phần chính:
 Project tree
 
 ```bash
-|__ driver
+|__ utils
+|   |__ response.util.go
+|__ configs
+    |__ index.config.go
+|__ drivers
 |  |__ <database>_driver.go
 |__ main.go
-|__ model
-|  |__ user.go
-|__ repository
-   |__ repoimpl
-   |   |__ user_repo_impl.go
-   |__ user_repo.go
+|__ models
+|  |__ user.model.go
+|__ repositories
+   |__ repoImpl
+   |   |__ user.repoImpl.go
+   |__ user.repo.go
 ```
 
 ## Ref
