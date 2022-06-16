@@ -96,8 +96,44 @@ Go has only one looping construct, the `for` has 3 components separated by semic
 A defer statement defers the execution of a function until the surrounding function returns. Được thực thi sau khi các hàm xung quanh thực thi xong
 `defer fmt.Println("world")`
 
-Deferred function calls are pushed onto a `stack`. When a function returns, its deferred calls are executed in `last-in-first-out` order. Defer đọc đầu tiên thì sẽ ra cuối cùng
+Deferred function calls are pushed onto a `stack`. When a function returns, its deferred calls are executed in `last-in-first-out` order
 
+```go
+package main
+import "fmt"
+
+func main() {
+	defer fmt.Println("Defer in main")
+	fmt.Println("Stat main")
+	f1()
+	fmt.Println("Finish main")
+}
+
+func f1() {
+	defer fmt.Println("Defer in f1")
+	fmt.Println("Start f1")
+	f2()
+	fmt.Println("Finish f1")
+}
+
+func f2() {
+	defer fmt.Println("Defer in f2")
+	fmt.Println("Start f2")
+	fmt.Println("Finish f2")
+}
+```
+Output
+```txt
+Stat main
+Start f1
+Start f2
+Finish f2
+Defer in f2
+Finish f1
+Defer in f1
+Finish main
+Defer in main
+```
 ### Pointer
 
 Pointer hold the memory address of a value
@@ -122,19 +158,27 @@ shallowClone := &v
 Lợi ích của việc sử dụng con trỏ
 
 - Function/method có thể thay đổi giá trị của biến
+
 - Tránh copy giá trị mỗi lần function/method call. Có hiệu quả với param là 1 struct lớn
 
 ### Array
 
-Fixed sized
+- Fixed sized
 
+- Cùng 1 kiểu dữ liệu
+
+- Array trong go không phải là dạng tham chiếu mà là tham trị. cần sử dụng list là tham số cho 1 hàm người ta đề xuất sử dụng slice thay vì array
+
+```go
+primes := [6]int{2, 3, 5, 7, 11, 13}
+```
 ### Slice
+
+**Slice là 1 tham chiếu đến array, nó mô tả 1 phần hay toàn bộ array**
 
 Dynamically-sized - allow select a half open range -> `slice[1:4]`
 
 Nếu không có low bound -> mảng không bị cắt. nếu có low bound thì cap của slice sẽ bị giảm
-
-Slice thực ra làm tham chiếu đến 1 mảng
 
 Slice `[]bool{true, true, false}` -references-> Array `[n]bool{true, true, false}`
 
@@ -144,7 +188,15 @@ Slice rỗng `var s []int` có len = 0 và cap = 0. thì mảng đó = nil. => `
 
 Slice can create by `make` function
 
+`Length` là số phần tử chứa trong Slice
+
+`Capacity` là số phần tử chứa trong Array mà Slice tham chiếu đến
+
+Các cách để khai báo 1 slice
+
 ```go
+c := []int{2, 3, 5, 7, 11, 13} // khai báo 1 mảng mà không chỉ ra kích thước thì đó là slice
+
 a := make([]int, 5)  // len(a)=5
 b := make([]int, 0, 5) // len(b)=0, cap(b)=5
 ```
@@ -383,6 +435,9 @@ Unmarshal: Passing từ JSON to struct
 var parsed interface{}
 err := json.Unmarshal(data, &parsed)
 ```
+
+### Goroutines
+
 
 ## About this project
 
