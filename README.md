@@ -122,7 +122,9 @@ func f2() {
 	fmt.Println("Finish f2")
 }
 ```
+
 Output
+
 ```txt
 Stat main
 Start f1
@@ -134,6 +136,7 @@ Defer in f1
 Finish main
 Defer in main
 ```
+
 ### Pointer
 
 Pointer hold the memory address of a value
@@ -172,6 +175,7 @@ Lợi ích của việc sử dụng con trỏ
 ```go
 primes := [6]int{2, 3, 5, 7, 11, 13}
 ```
+
 ### Slice
 
 **Slice là 1 tham chiếu đến array, nó mô tả 1 phần hay toàn bộ array**
@@ -359,6 +363,7 @@ var i interface{} = "hello"
 - Có thể so sánh 2 struct. Chỉ cần 2 struct có các kiểu dữ liệu có thể só sánh được thì có thể so sánh được với nhau. Golang so sánh 2 struct theo kiểu tham trị (So sánh từng field của 2 struct)
 
 - Viết hoa chữ cái đầu tiên của 1 `field name` của `struct` chứng tỏ field đó là public, viết thường là private
+
 ### Concurrency trong golang
 
 Golang không gọi các thread trong concurrency mà với 1 tên gọi khác là `Goroutine`. Giao tiếp giữa các goroutine là `channel`
@@ -389,6 +394,7 @@ ctx, cancel := context.WithTimeout(context.Background(), time.Second * 10)
 ```
 
 Passing data to context with key is struct or other type
+
 ```go
 type myStruct struct {
     ID  string
@@ -412,6 +418,7 @@ ctx1 := context.WithValue(ctx, "myKey", &mySig)
 	}
 }
 ```
+
 `ctx.Value("myKey")` return an interface. `.(*myStruct)` to convert it to the type `*myStruct`. So the value in the left hand side is of type `*myStruct` and u can access its field e.g `value.Sig`, `value.ID`
 
 ### bson <package>
@@ -421,6 +428,7 @@ format giá trị truyền vào để convert qua bson
 `bson.D`: Kiểu slice. Mỗi phần tử là 1 struct
 `bson.A`: Kiểu array
 Ví dụ
+
 ```go
 bson.M{"user": user} // kiểu map. Ngầm hiểu là {user : user}
 bson.D{{ Key: "email", Value: "abc@gmail.com" }, { Key: "password", Value"123" }} // kiểu slice. mỗi phần tử là 1 struct. Ngầm hiểu là{email : "abc@gmai.com", password : "123"}
@@ -428,15 +436,125 @@ bson.A{"a", "b"} // kiểu array. Ngầm hiểu là {...: "a", ...: "b"}
 ```
 
 ### Marshal - Unmarshal
+
 Marshal: Passing từ struct sang JSON. Dựa vào struct tag
 Unmarshal: Passing từ JSON to struct
+
 - Parsing JSON mà không biết trước cấu trúc. việc định nghĩa struct là bất khả thi do đó chúng ta sẽ dùng empty interface. Đợi đến thời điểm runtime thì compiler sẽ cung cấp memory phù hợp có những thứ đó
+
 ```go
 var parsed interface{}
 err := json.Unmarshal(data, &parsed)
 ```
 
 ### Goroutines
+
+Goroutines là các hàm hoặc phương thức chạy đồng thời với các hàm/ phương thức khác
+
+Trong go lúc nào cũng có 1 goroutine chính hay còn gọi là main goroutine. Khi Goroutine chính chạy xong mà các goroutines khác chưa chạy xong thì các goroutines khác đều bị hủy
+
+Example
+
+```go
+package main
+
+import (
+    "fmt"
+    "time"
+)
+
+func numbers() {
+    for i := 1; i <= 5; i++ {
+        time.Sleep(250 * time.Millisecond)
+        fmt.Printf("%d ", i)
+    }
+}
+func alphabets() {
+    for i := 'a'; i <= 'e'; i++ {
+        time.Sleep(400 * time.Millisecond)
+        fmt.Printf("%c ", i)
+    }
+}
+func main() {
+    go numbers()
+    go alphabets()
+    time.Sleep(3000 * time.Millisecond)
+    fmt.Println("main terminated")
+}
+```
+
+Kết quả
+
+```txt
+1 a 2 3 b 4 c 5 d e main terminated
+```
+
+Hình dưới đây mô tả cách chương trình làm việc
+![goroutines-explained](./images/Goroutines-explained.png 'goroutines explained')
+
+### Channel
+Cacs Goroutines giao tiếp với nhau bằng cách sử dụng channel. Tương tự như cách nước chảy từ đầu này sang đầu kia trong đường ống, dữ liệu có thể được gửi từ một đầu và nhận từ đầu kia bằng channels.
+
+Gửi và nhận dữ liệu từ channel. Chú ý chiều mũi tên từ channel
+```go
+a := make(chan int)
+data := <- a // đọc từ kênh a
+a <- data // gửi từ kênh a
+```
+
+Gửi và nhận đến một channel đang bị chặn theo mặc định.
+- Khi dữ liệu được **gửi** đến một channel, điều khiển sẽ bị chặn trong câu lệnh gửi cho đến khi một số Goroutine khác đọc từ channel đó.
+- Tương tự khi dữ liệu được **đọc** từ một channel, việc đọc bị chặn cho đến khi một số Goroutine ghi dữ liệu vào channel đó.
+
+Có thể tạo các channel 1 chiều. chỉ gửi hoặc chỉ nhận dữ liệu
+
+Channel có thể có số lượng phần tử chưa trong channel đó gọi là (buffered channel). Khi các goroutine cố găng ghi dữ liệu vào channel lớn hơn số lượng khai báo thì đều bị chặn lại cho đến khi giá trị có sẵn bên trong được đọc
+```go
+ch := make(chan bool, 1)
+```
+### Select
+Câu lệnh `select` được sử dụng để chọn từ nhiều hoạt động kênh gửi / nhận. Câu lệnh select sẽ chặn cho đến khi một trong các hoạt động gửi / nhận đã sẵn sàng. Nếu nhiều case đã sẵn sàng cùng 1 lúc, một trong số chúng được chọn ngẫu nhiên
+
+Câu lệnh `select` sẽ chặn chương trình cho đến khi 1 trong các case của nó được thực thi
+
+Cú pháp của select tương tự như switch. cũng có `default` case khi không có case nào khác sẵn sàng
+```go
+package main
+
+import (
+    "fmt"
+    "time"
+)
+
+func server1(ch chan string) {
+    time.Sleep(6 * time.Second)
+    ch <- "from server1"
+}
+func server2(ch chan string) {
+    time.Sleep(3 * time.Second)
+    ch <- "from server2"
+
+}
+func main() {
+    output1 := make(chan string)
+    output2 := make(chan string)
+    go server1(output1)
+    go server2(output2)
+    select {
+			case s1 := <-output1:
+					fmt.Println(s1)
+			case s2 := <-output2:
+					fmt.Println(s2)
+    }
+}
+```
+Kết quả
+```txt
+from server2  // 2 goroutines đang chạy trong 1 block select. server2 chạy nhanh hơn nên server2 được chọn và in ra.
+```
+
+### Mutex
+Mutex được sử dụng để cung cấp cơ chế khóa để đảm bảo rằng chỉ có một Goroutine đang chạy đoạn mã quan trọng tại bất kỳ thời điểm nào để ngăn chặn các xử lý ngoài mong đợi. Nhiều goroutines cùng thay đổi giá trị của 1 biến cũng 1 thời điểm có thể dẫn tới kết quả ngoài mong đợi (race condition)
 
 
 ## About this project
