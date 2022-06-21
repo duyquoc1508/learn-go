@@ -512,6 +512,22 @@ Channel có thể có số lượng phần tử chưa trong channel đó gọi l
 ```go
 ch := make(chan bool, 1)
 ```
+
+### Buffer channels and worker pools
+Sends to a buffered channel are blocked only when the buffer is full. Similarly receives from a buffered channel are blocked only when the buffer is empty.
+Mặc định channel có cap = 1. Tức là chỉ có 1 giá trị được tồn tại trong 1 channel tại 1 thời điểm.
+
+Buffered channels can be created by passing an additional capacity parameter to the make function which specifies the size of the buffer.
+Có thể chỉ định sức chứa của buffer channel bằng cách sau
+```go
+ch := make(chan type, capacity)
+```
+The `capacity` of a buffered channel is the number of values that the channel can hold
+The `length` of the buffered channel is the number of elements currently queued in it
+
+**Wait group**
+`Wait group` as it will be used in the implementation of **Worker pool**
+
 ### Select
 Câu lệnh `select` được sử dụng để chọn từ nhiều hoạt động kênh gửi / nhận. Câu lệnh select sẽ chặn cho đến khi một trong các hoạt động gửi / nhận đã sẵn sàng. Nếu nhiều case đã sẵn sàng cùng 1 lúc, một trong số chúng được chọn ngẫu nhiên
 
